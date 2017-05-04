@@ -1,0 +1,226 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>RETRO BREAKOUT</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+ <link rel="stylesheet" type="text/css" href="style3.css">
+</head>
+<body>
+ 
+<h1 id="title"> Retro Breakout!</h1><br>
+ 
+<canvas id="myCanvas" width="580" height="400" ></canvas>
+<br><br>
+<div id="audio">
+<audio controls autoplay loop>
+  <source src="breakoutmusic.ogg" type="audio/ogg">
+  <source src="breakoutmusic.mp3" type="audio/mpeg">
+</audio>
+</div>
+<br>
+<div id="footer">
+<p> Creator: Talha Malik | Email: Contact@talhawmalik.com </p>
+<p> http://www.talhawmalik.com | https://www.github.com/talhawmalik</p>
+<p id="icons"> <a href="http://www.talhawmalik.com"><img src="\icon.jpg" alt="Homepage" style="width:30px;height:25px;"></a> | 
+<a href="https://www.github.com/talhawmalik"><img src="\githubwhite.png" alt="Github" style="width:30px;height:30px;"></a> | 
+<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><img src="\youtube2.png" alt="Youtube" style="width:30px;height:30px;"></a></p>
+</div>
+ 
+<script>
+ 
+ 
+//links javascript to canvas. ctx allows me to paint the canvas in 2D with different colors and whatever
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var x = canvas.width/2;
+var y = canvas.height-30;
+var dx = 2;
+var dy = -2;
+var ballRadius = 6;
+var paddleHeight = 10;
+var paddleWidth = 43;
+var paddleX = (canvas.width-paddleWidth)/2; //starting point of the paddle on the x axis
+var rightPressed = false; //set to false because initially they are not pressed
+var leftPressed = false;
+var brickRowCount = 6;
+var brickColumnCount = 10;
+var brickWidth = 45;
+var brickHeight = 20;
+var brickPadding = 10;
+var brickOffsetTop = 30;
+var brickOffsetLeft = 30;
+var score = 0;
+var lives = 4;
+ 
+//two-dimensional array. X and y here represent canvas coordinates(location). If the status of the brick is 1, that means it wasn't hit yet and it will keep being displayed. If the status changes to zero, it means it was hit and it no longer is displayed
+var bricks = [];
+for(c=0; c<brickColumnCount; c++) {
+    bricks[c] = [];
+    for(r=0; r<brickRowCount; r++) {
+         bricks[c][r] = { x: 0, y: 0, status: 1 };
+    }
+}
+ 
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+document.addEventListener("mousemove", mouseMoveHandler, false);
+ 
+//key 39 is the right key and 37 is the left key. the function below says that when the the key is pressed down, the key pressed is changed to "true" and when the key is not pressed the key movements are "false".
+function keyDownHandler(e) {
+    if(e.keyCode == 39) {
+        rightPressed = true;
+    }
+    else if(e.keyCode == 37) {
+        leftPressed = true;
+    }
+}
+function keyUpHandler(e) {
+    if(e.keyCode == 39) {
+        rightPressed = false;
+    }
+    else if(e.keyCode == 37) {
+        leftPressed = false;
+    }
+}
+ 
+//connects the mouse to the paddle
+function mouseMoveHandler(e) {
+    var relativeX = e.clientX - canvas.offsetLeft;
+    if(relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth/2;
+    }
+}
+ 
+//clearRect clears the trail the ball leaves behind. x+=dx and y+=dy is more or less determining the number of frames that pop up to make the appearance of the ball as "moving" (in other words, the speed of the ball in this scenario). Note that function drawBall() is included in function draw().
+ 
+function drawBall() {
+ctx.beginPath();
+ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+ctx.fillStyle = "#D30300";
+ctx.fill();
+ctx.closePath();
+x += dx;
+y += dy; 
+}
+ 
+function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+    ctx.fillStyle = "#FCFF2E";
+    ctx.fill();
+    ctx.closePath();
+}
+ 
+//Draws the bricks. Var brickX and varBrickY are there because the default coordinates in the equation are set to 0,0. This means that all the bricks would be in the same position. So, the equation after var brickX and var brickY set them apart in different positions. Then the coordinates are changed to reflect that in "bricks[c][r].x = brickX;".
+function drawBricks() {
+    for(c=0; c<brickColumnCount; c++) {
+        for(r=0; r<brickRowCount; r++) {
+            if(bricks[c][r].status == 1) {
+                var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+                var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+                bricks[c][r].x = brickX;
+                bricks[c][r].y = brickY;
+                ctx.beginPath();
+                ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                ctx.fillStyle = "#85C2FA";
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }
+}
+//collision detection function here. status is 1 initially (which means the brick is shown), but if the ball collides with brick, the status will be changed to zero thus no longer displaying the brick
+function collisionDetection() {
+    for(c=0; c<brickColumnCount; c++) {
+        for(r=0; r<brickRowCount; r++) {
+            var b = bricks[c][r];
+            if(b.status == 1) {
+                if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+                    dy = -dy;
+                    b.status = 0;
+                    score++;
+                    if(score == brickRowCount*brickColumnCount) {
+                        alert("YOU BEAT THE GAME!");
+                        document.location.reload();
+                }
+            }
+        }
+    }
+}
+}
+ 
+function drawScore() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#FCFF2E";
+    ctx.fillText("Score: "+score * 3, 8, 20);
+   
+}
+ 
+function drawLives() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#FCFF2E";
+    ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+}
+ 
+ 
+//Activating all the functions from above
+function draw() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+drawBall();
+drawPaddle();
+drawScore();
+drawBricks();
+collisionDetection();
+drawLives();
+ 
+//the equations below keep the ball bouncing within the canvas. dy=-dy reverses the direction of where the ball hits (-dy and -dx are direction reversals of the present dy dx equations. We use the ball radius as the "<" ">" parameter
+ 
+//the "else if" states that if the ball hits the paddle, it will continue to bounce up. If not, it will result in a "game over" alert. If the ball reaches the bottom dimension (paddleX) and the ball also hits the paddle (paddleX + paddleWidth) it will bounce back up.
+if(y + dy < ballRadius) {
+    dy = -dy;
+} else if(y + dy > canvas.height-ballRadius) {
+    if(x > paddleX && x < paddleX + paddleWidth) {
+        dy = -dy;
+    }
+    else {
+        lives--;
+if(!lives) {
+    alert("GAME OVER - YOUR SCORE: " +score * 3);
+    document.location.reload();
+}
+else {
+    x = canvas.width/2;
+    y = canvas.height-30;
+    dx = 2;
+    dy = -2;
+    paddleX = (canvas.width-paddleWidth)/2;
+}
+    }
+}
+ 
+if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+  dx = -dx;
+}
+ 
+//this keeps the paddle within the canvas parameters. Also, the number defines the number of pixels it moves left and right
+ 
+if(rightPressed && paddleX < canvas.width-paddleWidth) {
+        paddleX += 7;
+    }
+    else if(leftPressed && paddleX > 0) {
+        paddleX -= 7;
+    }
+x += dx;
+y += dy; 
+}
+ 
+//the "setInterval" property allows the function to be called on in an infinite loop. I put 10 milliseconds as how long the function draw() lasts
+setInterval(draw, 15);
+ 
+ 
+ 
+</script>
+ 
+</body>
+</html>

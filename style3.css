@@ -1,0 +1,56 @@
+﻿@import url('https://fonts.googleapis.com/css?family=Permanent+Marker');
+
+body {
+  background:black;
+}
+ 
+* {
+  padding:0; margin:0;
+}
+canvas {
+  display:block;
+  background: black;
+  animation: colorchange 26s;
+  -webkit-animation: colorchange 26s infinite;
+  margin:0 auto;
+}
+@keyframes colorchange
+    {
+      0%   {background: black;}
+      25%  {background: #4F9432;}
+      50%  {background: #339E9D;}
+      75%  {background: #BA6852;}
+      100% {background: #DA68CC;}
+    }
+@-webkit-keyframes colorchange
+  {
+      0%   {background: black;}
+      25%  {background: #4F9432;}
+      50%  {background: #339E9D;}
+      75%  {background: #BA6852;}
+      100% {background: #DA68CC;}
+    }
+#title {
+  font-family: Permanent Marker;
+  text-align: center;
+  color: #F748CA;
+  font-size:40px;
+  text-shadow: -4px 3px black;
+ 
+}
+#audio {
+  margin-left:35%;
+  color:#F748CA;
+}
+#footer {
+  bottom:0;
+  left:0;
+  right:0;
+  position:relative;
+  text-align: center;
+  font-family: IM fell English SC;
+  font-size:14px;
+  background-color: black;
+  color:white;
+  margin-bottom:-3%;
+} 
